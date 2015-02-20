@@ -31,6 +31,7 @@ public class VentanaJuego extends javax.swing.JFrame {
     Disparo disparoAux ;
     
     ArrayList <Marciano> listaMarcianos = new ArrayList();
+    
     int velocidadMarciano = 1;
     
     
