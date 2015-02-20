@@ -104,6 +104,7 @@ private void bucleDelJuego() {
         }
         
         
+        
         if (pulsadaIzquierda){
             miNave.setX(miNave.getX() - 1);
         }
