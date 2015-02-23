@@ -17,6 +17,8 @@ public class VentanaJuego extends javax.swing.JFrame {
         //alto y ancho de la ventana
     int anchoPantalla = 600;
     int altoPantalla = 450;
+    
+    int disparosMaximos = 6;
 
     //buffer para dibujar
     BufferedImage buffer = null;
@@ -73,7 +75,56 @@ public class VentanaJuego extends javax.swing.JFrame {
         }
     }
 
+private void pintaMarcianos(Graphics2D g2){
+    
+        //Recorre la lista e marcianos,
+        //Los pinta en las coordenadas correspondientes
+        //Uso un variable booleana para indicar si ha tocado en la pared de la derecha o de la izquierda.
+        boolean cambia = false;
+        
+        for (int i=0; i<listaMarcianos.size(); i++){
+            Marciano m = listaMarcianos.get(i);
+            m.setX(m.getX() + velocidadMarciano);
+            //si choca en la pared derecha
+            if ( (m.getX() + m.ancho) > anchoPantalla ){
+                cambia = true;
+            }
+            //si choca en la pared izquierda
+            if (m.getX() <= 0){
+                cambia = true;
+            }
+            g2.drawImage(m.imagen1, m.getX(), m.getY(),null);   
+        }
+        
+        if (cambia){
+            velocidadMarciano = -velocidadMarciano;
+            for (int i=0; i<listaMarcianos.size(); i++){
+              Marciano m = listaMarcianos.get(i);
+              m.setY(m.getY() + (m.ancho/4));
+            }
+        }
+}
 
+private void pintaNave (Graphics2D g2){
+    if (pulsadaIzquierda){
+            miNave.setX(miNave.getX() - 1);
+        }
+        else if (pulsadaDerecha){
+            miNave.setX(miNave.getX() + 1);
+        }        
+        g2.drawImage(miNave.imagenNave, miNave.getX(), miNave.getY(), null);
+}
+
+private void pintaDisparos (Graphics2D g2){
+    for (int i=0; i<listaDisparos.size(); i++){
+            disparoAux = listaDisparos.get(i);
+            disparoAux.setY( disparoAux.getY() - 1);
+            if (disparoAux.getY() < 0){
+              listaDisparos.remove(i);
+            }
+            g2.drawImage(disparoAux.imagenDisparo, disparoAux.getX(), disparoAux.getY(), null);
+        } 
+}
     
     
 private void bucleDelJuego() {
@@ -89,38 +140,13 @@ private void bucleDelJuego() {
         /////////////////////////////////////////////////////
         //////    codigo del juego    ///////////////////////
         
-        for (int i=0; i<listaMarcianos.size(); i++){
-            Marciano m = listaMarcianos.get(i);
-            m.setX(m.getX() + velocidadMarciano);
-            //si choca en la pared derecha
-            if ( (m.getX() + m.ancho) > anchoPantalla ){
-                velocidadMarciano = -velocidadMarciano;
-            }
-            //si choca en la pared derecha
-            if (m.getX() <= 0){
-                velocidadMarciano = -velocidadMarciano;
-            }
-            g2.drawImage(m.imagen1, m.getX(), m.getY(),null);
-        }
+        pintaMarcianos(g2);
         
+        pintaNave(g2);
         
-        
-        if (pulsadaIzquierda){
-            miNave.setX(miNave.getX() - 1);
-        }
-        else if (pulsadaDerecha){
-            miNave.setX(miNave.getX() + 1);
-        }        
-        g2.drawImage(miNave.imagenNave, miNave.getX(), miNave.getY(), null);
+        pintaDisparos(g2);
 
-        for (int i=0; i<listaDisparos.size(); i++){
-            disparoAux = listaDisparos.get(i);
-            disparoAux.setY( disparoAux.getY() - 1);
-            if (disparoAux.getY() < 0){
-              listaDisparos.remove(i);
-            }
-            g2.drawImage(disparoAux.imagenDisparo, disparoAux.getX(), disparoAux.getY(), null);
-        }
+      
         
         /////////////////////////////////////////////////////
         //apunto al jPanel y dibujo el buffer sobre el jPanel
@@ -187,7 +213,7 @@ private void bucleDelJuego() {
            pulsadaDerecha = true;
         }
         // añado un disparo si se ha pulsado la barra espaciadora
-        if (evt.getKeyCode() == KeyEvent.VK_SPACE)
+        if ((evt.getKeyCode() == KeyEvent.VK_SPACE) && (listaDisparos.size() < 6))
         {
            Disparo d = new Disparo();
            d.setX( miNave.getX()+ miNave.getAnchoNave()/2 - d.imagenDisparo.getWidth(null)/2);
