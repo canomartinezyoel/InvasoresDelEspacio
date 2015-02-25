@@ -17,12 +17,12 @@ import javax.swing.Timer;
 
 /**
  *
- * @author Virtus
+ * @author Yoel Cano
  */
 public class VentanaJuego extends javax.swing.JFrame {
     //alto y ancho de la ventana
-    int anchoPantalla = 600;
-    int altoPantalla = 450;
+    int anchoPantalla = 800;
+    int altoPantalla = 650;
     
     //Buffer para dibujar
     BufferedImage buffer = null;
@@ -38,12 +38,13 @@ public class VentanaJuego extends javax.swing.JFrame {
     Disparo disparoAux;
     
     ArrayList <Marciano> listaMarcianos = new ArrayList();
-    
     int velocidadMarciano = 1;
     
     ArrayList <Explosion> listaExplosiones = new ArrayList();
     
+    int contadorTiempo = 0;
     
+    //Timer llama a bucle del juego cada 10ms.
     Timer temporizador = new Timer(10, new ActionListener() {
 
         @Override
@@ -87,10 +88,10 @@ public class VentanaJuego extends javax.swing.JFrame {
     private void pintaMarcianos(Graphics2D miGrafico){
         //uso una variable booleana para indicar si ha tocado
         //en la pared derecha o en la pared izquierda
-        boolean cambia = false;
-         
         //este bucle recorre la lista de marcianos y los
         //va pintando en las coordenada correspondiente
+        boolean cambia = false;
+        
         for (int i=0; i<listaMarcianos.size(); i++){
             Marciano m = listaMarcianos.get(i);
             m.setX(m.getX() + velocidadMarciano);
@@ -102,7 +103,13 @@ public class VentanaJuego extends javax.swing.JFrame {
             if (m.getX() <=0){
                 cambia = true;
             }
-            miGrafico.drawImage(m.imagen1, m.getX(), m.getY(), null);
+            //Dibujo la imagen correspondiente de los marcianor que cambbian en funcion de un timer.
+            if(contadorTiempo < 50){
+                miGrafico.drawImage(m.imagen1, m.getX(), m.getY(), null);
+            }
+            else{
+                miGrafico.drawImage(m.imagen2, m.getX(), m.getY(), null);
+            }
         }
         //si ha tocado cambia la velocidad
         if (cambia){
@@ -110,17 +117,17 @@ public class VentanaJuego extends javax.swing.JFrame {
             for(int i=0; i<listaMarcianos.size(); i++){
                 Marciano m = listaMarcianos.get(i);
                 m.setY(m.getY() + m.ancho/2);
-            }
+            }                    //Desplazamiento de los marcianos hacia abajo.
         }
     }
     
     private void pintaNave(Graphics2D g2){
         if (pulsadaIzquierda){
-            miNave.setX(miNave.getX() - 1);
-        }
+            miNave.setX(miNave.getX() - 4);
+        }                              //Velocidad desplazamiento de la nave
         else if (pulsadaDerecha){
-            miNave.setX(miNave.getX() + 1);
-        }
+            miNave.setX(miNave.getX() + 4);
+        }                              //Velocidad desplazamiento de la nave
         g2.drawImage(miNave.imagenNave, miNave.getX(), miNave.getY(), null);
     }
     
@@ -128,7 +135,7 @@ public class VentanaJuego extends javax.swing.JFrame {
         //pinta los disparos
         for(int i=0; i<listaDisparos.size(); i++){
             disparoAux = listaDisparos.get(i);
-            disparoAux.setY(disparoAux.getY() - 3);
+            disparoAux.setY(disparoAux.getY() - 10);
             if (disparoAux.getY() < 0){
                 listaDisparos.remove(i);
             }
@@ -171,23 +178,35 @@ public class VentanaJuego extends javax.swing.JFrame {
             //asigno al rectángulo las dimensiones del disparo y su posición
             rectanguloDisparo.setFrame(d.getX(), d.getY(), d.imagenDisparo.getWidth(null), d.imagenDisparo.getHeight(null));
             
+            boolean disparoABorrar =  false;
             //leo la lista de marcianos y comparo uno a uno con el disparo
             for (int i=0; i<listaMarcianos.size(); i++){
                 Marciano m = listaMarcianos.get(i);
                 rectanguloMarciano.setFrame(m.getX(), m.getY(), m.ancho, m.ancho);
                 if (rectanguloDisparo.intersects(rectanguloMarciano)){
-                    listaMarcianos.remove(i);
-                    listaDisparos.remove(j);
-                    
                     Explosion e = new Explosion();
                     e.setX(m.getX());
                     e.setY(m.getY());
                     listaExplosiones.add(e);
+                    listaMarcianos.remove(i);
+                    //listaDisparos.remove(j);
+            
+                    disparoABorrar = true;
                 }
+            }
+            if (disparoABorrar){
+                listaDisparos.remove(j);
             }
             
         }
         
+    }
+    
+    private void actualizaContadorTiempo(){
+        contadorTiempo++;
+        if(contadorTiempo > 100){
+            contadorTiempo = 0;
+        }
     }
     
     private void bucleDelJuego(){
@@ -206,6 +225,7 @@ public class VentanaJuego extends javax.swing.JFrame {
         pintoDisparos(g2);
         chequeaColision();
         pintaExplosiones(g2);
+        actualizaContadorTiempo();
         /////////////////////////////////////////////////////
         //apunto al JPanel y dibujo el buffer sobre el JPanel
         g2 = (Graphics2D) jPanel1.getGraphics();
@@ -282,8 +302,8 @@ public class VentanaJuego extends javax.swing.JFrame {
             pulsadaDerecha = true;
        }
        //añado un disparo si se ha pulsado la barra espaciadora
-       if ((evt.getKeyCode() == KeyEvent.VK_SPACE) && (listaDisparos.size() < 6)){
-           
+       if ((evt.getKeyCode() == KeyEvent.VK_SPACE) && (listaDisparos.size() < 2)){
+                                                                             //2 disparos maximos simultaneos.
             Disparo d = new Disparo();
             d.setX( miNave.getX() + miNave.getAnchoNave() /2 - d.imagenDisparo.getWidth(null)/2);
             d.setY( miNave.getY());

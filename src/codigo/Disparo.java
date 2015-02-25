@@ -7,7 +7,7 @@ import javax.imageio.ImageIO;
 
 /**
  *
- * @author Virtus
+ * @author Yoel Cano
  */
 public class Disparo {
     Image imagenDisparo = null;

@@ -9,7 +9,7 @@ import javax.imageio.ImageIO;
 
 /**
  *
- * @author Virtus
+ * @author Yoel Cano
  */
 public class Nave {
     Image imagenNave = null;

@@ -7,7 +7,7 @@ import javax.imageio.ImageIO;
 
 /**
  *
- * @author Virtus
+ * @author Yoel Cano
  */
 public class Marciano {
     Image imagen1 = null;
